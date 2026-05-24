@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { request } from '../api/client';
-import { Box, Button, TextField, Typography, Paper, Alert } from '@mui/material';
+import { Box, Button, TextField, Typography, Paper, Alert, Collapse } from '@mui/material';
+import { AddCircleOutlined as AddCircleOutlineIcon } from '@mui/icons-material';
 
 export default function CourseForm({ onCourseCreated, token }) {
   const [name, setName] = useState('');
@@ -15,8 +16,6 @@ export default function CourseForm({ onCourseCreated, token }) {
     setError('');
     setSuccess('');
     try {
-      const body = { name, description, code, credits: parseInt(credits) };
-      console.log('Enviando:', JSON.stringify(body));
       await request('/api/courses', {
         method: 'POST',
         body: JSON.stringify({
@@ -38,20 +37,54 @@ export default function CourseForm({ onCourseCreated, token }) {
   };
 
   return (
-    <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
-      <Typography variant="h6" mb={2}>Agregar curso</Typography>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+    <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+      <Box display="flex" alignItems="center" gap={1} mb={2.5}>
+        <AddCircleOutlineIcon color="primary" />
+        <Typography variant="h6">Agregar curso</Typography>
+      </Box>
+
+      <Collapse in={!!error}>
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>
+      </Collapse>
+      <Collapse in={!!success}>
+        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess('')}>{success}</Alert>
+      </Collapse>
+
       <Box component="form" onSubmit={handleSubmit} display="flex" flexDirection="column" gap={2}>
-        <TextField label="Nombre del curso" value={name}
-          onChange={(e) => setName(e.target.value)} required fullWidth />
-        <TextField label="Descripción" value={description}
-          onChange={(e) => setDescription(e.target.value)} multiline rows={2} fullWidth />
-        <TextField label="Código (ej: CS101)" value={code}
-          onChange={(e) => setCode(e.target.value)} required fullWidth />
-        <TextField label="Créditos" value={credits} type="number"
-          onChange={(e) => setCredits(e.target.value)} required fullWidth />
-        <Button type="submit" variant="contained">Crear curso</Button>
+        <TextField
+          label="Nombre del curso"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          fullWidth
+        />
+        <TextField
+          label="Descripción"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          multiline
+          rows={2}
+          fullWidth
+        />
+        <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+          <TextField
+            label="Código (ej: CS101)"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            required
+          />
+          <TextField
+            label="Créditos"
+            value={credits}
+            type="number"
+            inputProps={{ min: 1 }}
+            onChange={(e) => setCredits(e.target.value)}
+            required
+          />
+        </Box>
+        <Button type="submit" variant="contained" sx={{ alignSelf: 'flex-end', px: 4 }}>
+          Crear curso
+        </Button>
       </Box>
     </Paper>
   );
